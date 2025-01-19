@@ -1,16 +1,16 @@
+import { decodeJWT } from "@/helpers/decodeJWT";
+import { API } from "@/lib/axios";
 import cookies from "js-cookie";
 import {
   createContext,
-  ReactNode,
+  type ReactNode,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
   useState,
 } from "react";
 import { useNavigate } from "react-router-dom";
-
-import { API } from "@/lib/axios";
-import { decodeJWT } from "@/helpers/decodeJWT";
 
 type TAuthContext = {
   user: {
@@ -24,10 +24,14 @@ type TAuthContext = {
 };
 
 const AuthContext = createContext({} as TAuthContext);
+
 export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
   const [userToken, setUserToken] = useState<string | undefined | null>(() => {
-    return cookies.get("_user-auth");
+    return cookies.get("_userAuth");
   });
+  const publicRoutes = useMemo(() => ["/", "/signup"], []);
+
+  const navigate = useNavigate();
 
   const [user, setUser] = useState(() => {
     if (userToken) {
@@ -43,26 +47,28 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
     return null;
   });
 
-  const navigate = useNavigate();
+  const handleLogin = useCallback(
+    async (data: string) => {
+      setUserToken(data);
+      cookies.set("_userAuth", data, { expires: 7 });
+      API.defaults.headers.authorization = `Bearer ${data}`;
+      navigate("/app");
+    },
+    [navigate]
+  );
 
-  const handleLogin = async (data: string) => {
-    setUserToken(data);
-    cookies.set("_user-auth", data, { expires: 7 });
-    API.defaults.headers.authorization = `Bearer ${data}`;
-    navigate("/app");
-  };
-
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     setUserToken(null);
     setUser(null);
-    cookies.remove("_user-auth");
+    cookies.remove("_userAuth");
     navigate("/", { replace: true });
-  };
+  }, [setUserToken, setUser, navigate]);
 
   useEffect(() => {
     if (userToken) {
       API.defaults.headers.authorization = `Bearer ${userToken}`;
-      const { user } = decodeJWT(userToken);
+      const decodedUser = decodeJWT(userToken);
+      const { user } = decodedUser;
       setUserToken(() => userToken);
       setUser({
         id: user.id,
@@ -73,14 +79,11 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
   }, [userToken]);
 
   useEffect(() => {
-    if (
-      !cookies.get("_user-auth") &&
-      !window.location.pathname.includes("signup") &&
-      !window.location.pathname.includes("forgot-password")
-    ) {
-      navigate("/");
-    }
-  }, [navigate]);
+    const token = cookies.get("_userAuth");
+    const currentPath = window.location.pathname;
+    if (!token && !publicRoutes.includes(currentPath)) return navigate("/");
+    if (token && currentPath === "/") return navigate("/app");
+  }, [navigate, publicRoutes]);
 
   const value = useMemo(
     () => ({

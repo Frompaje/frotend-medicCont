@@ -48,9 +48,6 @@ export const LoginForm = () => {
             {...register("password")}
           />
 
-          <Link className="underline" to={"/"}>
-            Esqueci minha senha
-          </Link>
         </div>
         <Button className="w-4/5 lg:w-3/5" disabled={isPending || !isValid}>
           {isPending ? <Loader2 className="ml-2 animate-spin" /> : "Login"}
@@ -58,7 +55,7 @@ export const LoginForm = () => {
 
         <div className="flex flex-col sm:flex-row  gap-1">
           <span>Ainda não tem conta?</span>
-          <Link className="underline" to={"/"}>
+          <Link className="underline" to={"/signup"}>
             Cadastre-se agora
           </Link>
         </div>
