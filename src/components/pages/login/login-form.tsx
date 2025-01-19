@@ -9,12 +9,16 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, LoginSchema } from "@/helpers/types/userSchema";
 import { Loader2 } from "lucide-react";
+import { useAuth } from "@/providers/auth-context";
 
 export const LoginForm = () => {
+  const { handleLogin } = useAuth();
+
   const { mutate, isPending } = useMutation({
     mutationFn: UserService.login,
-    onSuccess: async () => {
+    onSuccess: async (data) => {
       toast.success("Logado com sucesso!");
+      await handleLogin(data.accessToken);
     },
     onError: async () => {
       toast.error("Credenciais inválidas");

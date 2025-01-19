@@ -1,4 +1,8 @@
-import { InputCreateUser, InputLoginUser, JwtPayload } from "@/helpers/types/user";
+import {
+  InputCreateUser,
+  InputLoginUser,
+  LoginResponse,
+} from "@/helpers/types/user";
 import { API } from "@/lib/axios";
 
 export class UserService {
@@ -8,11 +12,8 @@ export class UserService {
     return response.data;
   }
   static async login(data: InputLoginUser) {
-    const response = await API.post<JwtPayload>("user/login", data);
+    const response = await API.post<LoginResponse>("user/login", data);
 
     return response.data;
   }
 }
-
-
-

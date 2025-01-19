@@ -16,3 +16,5 @@ export type JwtPayload = {
     email: string;
   };
 };
+
+export type LoginResponse = { accessToken: string };
