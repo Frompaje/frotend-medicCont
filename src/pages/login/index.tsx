@@ -4,7 +4,7 @@ export const Login = () => {
   
   return (
     <main className="font-semibold  grid  h-screen lg:grid-cols-2">
-      <div className="bg-purple-500 rounded-r-lg hidden lg:block"></div>
+      <div className="bg-black rounded-r-lg hidden lg:block"></div>
 
       <div className="grid lg:grid-cols-subgrid p-2">
         <div className="flex flex-col items-center justify-center text-center">
